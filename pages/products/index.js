@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import styles from "../../styles/ProductDashboard.module.css";
 import { useState, useEffect } from "react";
+import connectDB from "../api/_db/connect-db";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -29,6 +30,10 @@ const Products = () => {
     };
     getProducts();
   }, [categoryFilter]);
+
+  //   async function onDelete(product){
+  // await Product.deleteOne({ _id: req.query.{product} })
+  //   }
 
   return (
     <>
@@ -58,6 +63,9 @@ const Products = () => {
             return (
               <li key={product._id}>
                 <Link href={`/products/${product._id}`}>{product.name}</Link>
+                <button onClick={() => onDelete(product._id)}>
+                  Delete this product
+                </button>
               </li>
             );
           })}
