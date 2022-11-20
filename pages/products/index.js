@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import styles from "../../styles/ProductDashboard.module.css";
 import { useState, useEffect } from "react";
-import connectDB from "../api/_db/connect-db";
+import router from "next/router";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -31,9 +31,47 @@ const Products = () => {
     getProducts();
   }, [categoryFilter]);
 
-  //   async function onDelete(product){
-  // await Product.deleteOne({ _id: req.query.{product} })
-  //   }
+  async function deleteProduct(idToDelete) {
+    try {
+      const url = `/api/products/` + idToDelete;
+      const response = await fetch(url, { method: "DELETE" });
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(products.filter((product) => product._id !== data._id));
+      } else {
+        throw new Error(`Fetch fehlgeschlagen mit Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+    router.reload();
+  }
+
+  async function createProduct(event) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.target));
+    const newProduct = {
+      name: data.name,
+      category: data.category,
+      detail: data.detail,
+    };
+    try {
+      const url = `/api/products/`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProduct),
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+    router.reload();
+  }
 
   return (
     <>
@@ -63,13 +101,25 @@ const Products = () => {
             return (
               <li key={product._id}>
                 <Link href={`/products/${product._id}`}>{product.name}</Link>
-                <button onClick={() => onDelete(product._id)}>
+                <button onClick={() => deleteProduct(product._id)}>
                   Delete this product
                 </button>
               </li>
             );
           })}
         </ul>
+        <form onSubmit={createProduct}>
+          <label htmlFor="name">Name</label>
+          <input id="name" name="name" type="text" required />
+          <br />
+          <label htmlFor="category">Category</label>
+          <input id="category" name="category" type="text" required />
+          <br />
+          <label htmlFor="detail">Details</label>
+          <input id="detail" name="detail" type="text" />
+          <br />
+          <button type="submit">SUBMIT</button>
+        </form>
       </div>
     </>
   );
