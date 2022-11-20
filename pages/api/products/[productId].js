@@ -15,7 +15,6 @@ async function handler(req, res) {
         return res.status(500).json({ error: error.message });
       }
     case "DELETE":
-      console.log(req);
       try {
         const deleted = await Product.deleteOne({ _id: req.query.productId });
         if (deleted) {
